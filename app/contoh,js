@@ -1,0 +1,160 @@
+'use client';
+import {
+    Box,
+    Button,
+    Card,
+    CardHeader,
+    CardBody,
+    CardFooter,
+    FormControl,
+    FormLabel,
+    Heading,
+    Input,
+    Modal,
+    ModalOverlay,
+    ModalContent,
+    ModalHeader,
+    ModalFooter,
+    ModalBody,
+    ModalCloseButton,
+    Stack,
+    StackDivider,
+    Text
+} from '@chakra-ui/react';
+import { useEffect, useState } from 'react';
+
+function Page() {
+    const tempTodo = {};
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
+    const [todos, setTodos] = useState(JSON?.parse(localStorage.getItem('todos') || '[]'));
+
+    function handleDeleteTodo(todoIndex) {
+        const tempTodos = Array.from(todos);
+        tempTodos[todoIndex] = null;
+        console.log(todoIndex, tempTodos);
+        const result = tempTodos.filter(todo => todo !== null);
+
+        setTodos(result);
+    }
+
+    useEffect(() => {
+        localStorage.setItem('todos', JSON.stringify(todos));
+    }, [todos]);
+
+    return (
+        <main className='px-5 py-10'>
+            <Card>
+                <CardHeader className='flex items-center'>
+                    <Heading size='lg'>My Todo-List</Heading>
+                    <Button
+                        className='ml-auto'
+                        colorScheme="blue"
+                        onClick={() => {
+                            setIsCreateOpen(true)
+                        }}
+                    >
+                        Add Todo
+                    </Button>
+                </CardHeader>
+
+                <CardBody>
+                    <Stack divider={<StackDivider />} spacing='4'>
+
+                        {todos.map((todo, index) => (
+                            <Box key={`todo-item-${index}`} className='flex'>
+                                <Box className='flex flex-col'>
+                                    <Heading size='md' textTransform='uppercase'>
+                                        {todo?.title}
+                                    </Heading>
+                                    <Text fontSize='xs'>
+                                        Deadline: {todo?.endTime?.toDateString?.() || todo?.endTime}
+                                    </Text>
+                                    <Text pt='2' fontSize='md'>
+                                        {todo?.desc}
+                                    </Text>
+                                </Box>
+
+                                <Box className='ml-auto flex items-center'>
+                                    <Button className='ml-2' colorScheme="yellow">Edit</Button>
+                                    <Button
+                                        className='ml-2'
+                                        colorScheme="red"
+                                        onClick={() => handleDeleteTodo(index)}
+                                    >
+                                        Delete
+                                    </Button>
+                                </Box>
+                            </Box>
+                        ))}
+
+                    </Stack>
+                </CardBody>
+            </Card>
+
+            <Modal
+                isOpen={isCreateOpen}
+                onClose={() => setIsCreateOpen(false)}
+            >
+                <ModalOverlay />
+                <ModalContent>
+                    <ModalHeader>Create your account</ModalHeader>
+                    <ModalCloseButton />
+                    <ModalBody pb={6}>
+                        <FormControl>
+                            <FormLabel>Title</FormLabel>
+                            <Input 
+                                placeholder='Title'
+                                onInput={(e) => {
+                                    tempTodo.title = e.target.value;
+                                }} 
+                            />
+                        </FormControl>
+
+                        <FormControl mt={4}>
+                            <FormLabel>Description</FormLabel>
+                            <Input 
+                                placeholder='Description'
+                                onInput={(e) => {
+                                    tempTodo.desc = e.target.value;
+                                }}
+                            />
+                        </FormControl>
+
+                        <FormControl mt={4}>
+                            <FormLabel>End Time</FormLabel>
+                            <Input
+                                type='datetime-local'
+                                onInput={(e) => {
+                                    tempTodo.endTime = new Date(e.target.value);
+                                }} 
+                            />
+                        </FormControl>
+                    </ModalBody>
+
+                    <ModalFooter>
+                        <Button
+                            colorScheme='blue'
+                            mr={3}
+                            onClick={() => {
+                                setIsCreateOpen(false)
+                                setTodos((todos) => ([
+                                    ...todos,
+                                    tempTodo,
+                                ]))
+                            }}
+                        >
+                            Save
+                        </Button>
+                        <Button 
+                            onClick={() => setIsCreateOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                    </ModalFooter>
+                </ModalContent>
+            </Modal>
+        </main>
+    )
+}
+
+export default Page;
